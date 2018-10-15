@@ -23,7 +23,7 @@ INC_DIRS ?= -Iunity/src -I../
 TEST_SRC = $(wildcard *.c)
 TEST_BIN=$(addprefix output/, $(TEST_SRC:.c=.bin))
 
-all: clean test
+all: clean tests test
 
 output/%.bin: %.c
 	@mkdir -p output
