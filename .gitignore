@@ -1,6 +1,7 @@
 #build artifacts
 *.bin
 *.o
+tests/output
 
 #vim files
 *.swp
