@@ -1,0 +1,8 @@
+#build artifacts
+*.bin
+*.o
+
+#vim files
+*.swp
+*.swo
+*~
