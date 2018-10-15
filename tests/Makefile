@@ -17,8 +17,8 @@ CFLAGS += -Wstrict-prototypes
 CFLAGS += -Wundef
 CFLAGS += -Wold-style-definition
 
-SRC_FILES = unity/src/unity.c ../app_data.c 
-INC_DIRS ?= -Iunity/src -I../
+SRC_FILES = Unity/src/unity.c ../app_data.c 
+INC_DIRS ?= -IUnity/src -I../
 
 TEST_SRC = $(wildcard *.c)
 TEST_BIN=$(addprefix output/, $(TEST_SRC:.c=.bin))
