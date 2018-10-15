@@ -2,7 +2,6 @@
 #include "app_data.h"
 
 static void init_should_allocate(void) {
-	app_data_init(10);
 	TEST_ASSERT_EQUAL_INT(0, app_data_init(10));
 }
 
