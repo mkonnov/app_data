@@ -1,6 +1,4 @@
-.PHONY: all 
-
-UNITY_SRC = unity/src/unity.c
+.PHONY: all tests test
 
 CC = gcc
 
@@ -19,20 +17,24 @@ CFLAGS += -Wstrict-prototypes
 CFLAGS += -Wundef
 CFLAGS += -Wold-style-definition
 
-
-SRC_FILES = $(UNITY_SRC) ../app_data.c 
+SRC_FILES = unity/src/unity.c ../app_data.c 
 INC_DIRS ?= -Iunity/src -I../
 
 TEST_SRC = $(wildcard *.c)
-TEST_BIN = $(TEST_SRC:.c=.bin)
+TEST_BIN=$(addprefix output/, $(TEST_SRC:.c=.bin))
 
 all: clean test
 
-$(TEST_BIN): $(TEST_SRC)
-	$(CC) $(CFLAGS) $(INC_DIRS) $(SRC_FILES) $< -o $@
+output/%.bin: %.c
+	@mkdir -p output
+	@echo compiling $@ ...
+	@$(CC) $(CFLAGS) $(INC_DIRS) $< $(SRC_FILES)  -o $@
+	chmod +x $@
 
-test: $(TEST_BIN)
-	./$(TEST_BIN)
+tests: $(TEST_BIN)
+
+test: tests
+	for f in $(TEST_BIN); do ./$$f; done
 
 clean:
-	rm -f $(TEST_BIN)
+	@rm -rf output
