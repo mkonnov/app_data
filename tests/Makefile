@@ -20,13 +20,19 @@ CFLAGS += -Wundef
 CFLAGS += -Wold-style-definition
 
 
-SRC_FILES = $(UNITY_SRC) ../app_data.c $(wildcard *.c)
+SRC_FILES = $(UNITY_SRC) ../app_data.c 
 INC_DIRS ?= -Iunity/src -I../
+
+TEST_SRC = $(wildcard *.c)
+TEST_BIN = $(TEST_SRC:.c=.bin)
 
 all: clean test
 
-test:
-	$(CC) $(CFLAGS) $(INC_DIRS) $(SRC_FILES) -o test.bin
+$(TEST_BIN): $(TEST_SRC)
+	$(CC) $(CFLAGS) $(INC_DIRS) $(SRC_FILES) $< -o $@
+
+test: $(TEST_BIN)
+	./$(TEST_BIN)
 
 clean:
-	rm -f test.bin
+	rm -f $(TEST_BIN)
