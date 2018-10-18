@@ -29,7 +29,7 @@ int app_data_deinit(void) {
 	return 0;
 }
 
-int app_data_add_item(const app_data_config_struct_t *item, uint32_t id) {
+int app_data_register_item(const app_data_config_struct_t *item, uint32_t id) {
 	/* item is already occupied by another data */
 	if (items[id].data != NULL)
 		return -2;
