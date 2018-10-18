@@ -5,12 +5,10 @@
 
 #define ITEM_ID 0
 
-const app_data_config_struct_t conf[] = {
-	[ITEM_0] = {
-		4,
-		NULL,
-		NULL
-	}
+const app_data_config_struct_t conf = {
+	4, 	/* data size */
+	NULL,	/* no acquire callback */
+	NULL	/* no post callback */
 };
 
 static void data_should_match(void) {
