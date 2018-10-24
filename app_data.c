@@ -3,15 +3,39 @@
 #include <stdbool.h>
 
 #include "app_data.h"
+#include "os_port_interface.h"
 
 struct app_data_item {
 	bool data_updated;
 	void *data;
 	void *data_prev;
 	app_data_config_struct_t init;
+	struct os_mutex mutex;
 };
 
 static struct app_data_item *items = NULL;
+
+static void _app_data_copy_data(uint32_t id, const void *data) {
+	/*
+	 * move the current data to a "previous" place
+	 */
+	memset(items[id].data_prev, 0, items[id].init.size);
+	memcpy(items[id].data_prev, items[id].data, items[id].init.size);
+
+	/*
+	 * put the new data at "current" position
+	 */
+	memset(items[id].data, 0, items[id].init.size);
+	memcpy(items[id].data, data, items[id].init.size);
+
+	/*
+	 * if the data is differs, then reise "updated" flag
+	 */
+	items[id].data_updated = false;
+	if (memcmp(items[id].data, items[id].data_prev, items[id].init.size) != 0)
+		items[id].data_updated = true;
+}
+
 
 int app_data_init(uint32_t count) {
 	items = (struct app_data_item *) malloc (sizeof(struct app_data_item) * count);
@@ -36,7 +60,7 @@ int app_data_register_item(const app_data_config_struct_t *item, uint32_t id) {
 
 	items[id].data = malloc (item->size);
 	items[id].data_prev = malloc (item->size);
-
+	os_port_mutex_init(&items[id].mutex);
 	memcpy(&items[id].init, item, sizeof(app_data_config_struct_t));
 	return 0;
 }
@@ -50,42 +74,72 @@ int app_data_get_size(uint32_t id, size_t *sz) {
 	return 0;
 }
 
-
-int app_data_set(uint32_t id, const void *data) {
+int app_data_set_blocking(uint32_t id, const void *data) {
 
 	if (items[id].data == NULL)
 		return -1;
 
-	/*
-	 * move the current data to a "previous" place
-	 */
-	memset(items[id].data_prev, 0, items[id].init.size);
-	memcpy(items[id].data_prev, items[id].data, items[id].init.size);
+	if (os_port_mutex_lock(&items[id].mutex) != 0)
+		return -2;
 
-	/*
-	 * put the new data at "current" position
-	 */
-	memset(items[id].data, 0, items[id].init.size);
-	memcpy(items[id].data, data, items[id].init.size);
+	_app_data_copy_data(id, data);
 
-	/*
-	 * if the data is differs, then reise "updated" flag
-	 */
-	items[id].data_updated = false;
-	if (memcmp(items[id].data, items[id].data_prev, items[id].init.size) != 0)
-		items[id].data_updated = true;
+	if (os_port_mutex_unlock(&items[id].mutex) != 0)
+		return -3;
 
 	return 0;
 }
 
-int app_data_get(uint32_t id, void *data_out) {
+int app_data_set_nonblocking(uint32_t id, const void *data) {
 
 	if (items[id].data == NULL)
 		return -1;
+
+	if (os_port_mutex_trylock(&items[id].mutex) != 0)
+		return -2;
+
+	_app_data_copy_data(id, data);
+
+	if (os_port_mutex_unlock(&items[id].mutex) != 0)
+		return -3;
+
+	return 0;
+}
+
+
+int app_data_get_blocking(uint32_t id, void *data_out) {
+
+	if (items[id].data == NULL)
+		return -1;
+
+	if (os_port_mutex_lock(&items[id].mutex) != 0)
+		return -2;
 
 	memcpy(data_out, items[id].data, items[id].init.size);
+
+	if (os_port_mutex_unlock(&items[id].mutex) != 0)
+		return -3;
+	
 	return 0;
 }
+
+int app_data_get_nonblocking(uint32_t id, void *data_out) {
+
+	if (items[id].data == NULL)
+		return -1;
+
+	if (os_port_mutex_trylock(&items[id].mutex) != 0)
+		return -2;
+
+	memcpy(data_out, items[id].data, items[id].init.size);
+
+	if (os_port_mutex_unlock(&items[id].mutex) != 0)
+		return -3;
+
+	return 0;
+}
+
+
 
 int app_data_get_data_ptr(uint32_t id, void **ptr) {
 
