@@ -12,7 +12,7 @@ const app_data_config_struct_t conf = {
 };
 
 static void data_should_match(void) {
-	int int_set = 0xa5a5a5a5, int_get;
+	uint32_t int_set = 0xa5a5a5a5, int_get;
 	TEST_ASSERT_EQUAL_INT(0, app_data_init(1)); 			/* allocate space for 1 item */
 	TEST_ASSERT_EQUAL_INT(0, app_data_register_item(&conf, ITEM_ID));	
 	TEST_ASSERT_EQUAL_INT(0, app_data_set(ITEM_ID, &int_set));
