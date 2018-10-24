@@ -16,9 +16,12 @@ CFLAGS += -Wno-unknown-pragmas
 CFLAGS += -Wstrict-prototypes
 CFLAGS += -Wundef
 CFLAGS += -Wold-style-definition
+CFLAGS += -pthread
 
 SRC_FILES = Unity/src/unity.c ../app_data.c 
-INC_DIRS ?= -IUnity/src -I../
+SRC_FILES += ../os_port/linux/os_port_linux.c
+
+INC_DIRS ?= -IUnity/src -I../ -I../os_port -I../os_port/linux
 
 TEST_SRC = $(wildcard *.c)
 TEST_BIN=$(addprefix output/, $(TEST_SRC:.c=.bin))
@@ -34,7 +37,7 @@ output/%.bin: %.c
 tests: $(TEST_BIN)
 
 test: tests
-	for f in $(TEST_BIN); do ./$$f; done
+	@for f in $(TEST_BIN); do ./$$f; done
 
 clean:
-	@rm -rf output
+	rm -rf output
