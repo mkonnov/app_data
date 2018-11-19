@@ -3,7 +3,7 @@
 #include <stdbool.h>
 
 #include "app_data.h"
-#include "os_port_interface.h"
+#include "os_port/os_port_interface.h"
 
 struct app_data_item {
 	bool data_updated;
